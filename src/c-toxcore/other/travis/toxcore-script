@@ -1,0 +1,42 @@
+#!/bin/sh
+
+# Enable test coverage recording.
+export CFLAGS="$CFLAGS -fprofile-arcs -ftest-coverage"
+
+set_opt() {
+  opts="$opts -D$1="`expr ON \& \( $i % 2 \) \| OFF`
+  set +e # result can be 0
+  i=`expr $i / 2`
+  set -e
+}
+
+# Try some combinations of cmake options.
+for i in `seq 0 7`; do
+  set +x
+  opts="$CMAKE_EXTRA_FLAGS -DWARNINGS=OFF"
+  set_opt STRICT_ABI
+  set_opt ENABLE_STATIC
+  set_opt ENABLE_SHARED
+  set -x
+  RUN $CMAKE -B$BUILD_DIR -H. $opts
+  rm -rf $BUILD_DIR
+done
+
+# Build toxcore and run tests.
+RUN $CMAKE                                      \
+  -B$BUILD_DIR                                  \
+  -H.                                           \
+  -DCMAKE_INSTALL_PREFIX:PATH=$CURDIR/_install  \
+  -DASAN=ON                                     \
+  -DDEBUG=ON                                    \
+  -DSTRICT_ABI=ON                               \
+  -DTEST_TIMEOUT_SECONDS=120                    \
+  -DTRACE=ON                                    \
+  $CMAKE_EXTRA_FLAGS
+
+export CTEST_OUTPUT_ON_FAILURE=1
+
+RUN make -C$BUILD_DIR -j$NPROC -k install
+if $RUN_TESTS; then
+  TESTS $MAX_TEST_RETRIES make -C$BUILD_DIR -j$NPROC test ARGS="--rerun-failed"
+fi
