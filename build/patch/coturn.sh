@@ -12,7 +12,9 @@ HOST=$1
 
 case ${HOST} in
     "Linux")
-	cd ${SRC_DIR} && patch -s -p0 Makefile "${BUILD_DIR}/patch/coturn.patch"
+	cd ${SRC_DIR} \
+            && patch -s -p0 Makefile "${BUILD_DIR}/patch/coturn.patch" \
+                && sed -ie "s%-lcrypto -lssl -levent_core -levent_extra%-ldl -lssl -lcrypto -levent_extra -levent_core%" Makefile
 	;;
     *)
         ;;
