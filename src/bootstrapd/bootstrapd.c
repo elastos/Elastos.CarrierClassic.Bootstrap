@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <limits.h>
+#include <time.h>
 #include <getopt.h>
 #include <assert.h>
 #include <fcntl.h>
@@ -87,8 +88,9 @@ static pid_t start_turn_server(const char *turn_server_config)
 
     if (pid == 0) {
         char *args[3];
+        int rc;
 
-        setproctitle("Elastos-Bootstrap-TURN");
+        //setproctitle("Elastos-Bootstrap-TURN");
 
         args[0] = (char *)PROGRAM_NAME;
         args[1] = (char *)"-c";
@@ -102,8 +104,8 @@ static pid_t start_turn_server(const char *turn_server_config)
         optopt = '?';
         optarg = NULL;   
 
-        turn_main(3, args);
-        exit(0);
+        rc = turn_main(3, args);
+        exit(rc);
     }
 
     return pid;
@@ -124,8 +126,9 @@ static pid_t start_tox_bootstrap(const char *tox_bootstrap_config)
     if (pid == 0) {
         char *args[2];
         char config_arg[PATH_MAX];
+        int rc;
 
-        setproctitle("Elastos-Bootstrap-DHT");
+        //setproctitle("Elastos-Bootstrap-DHT");
 
         sprintf(config_arg, "--config=%s", tox_bootstrap_config);
         args[0] = (char *)PROGRAM_NAME;
@@ -139,8 +142,8 @@ static pid_t start_tox_bootstrap(const char *tox_bootstrap_config)
         optopt = '?';
         optarg = NULL;   
 
-        tox_bootstrap_main(2, args);
-        exit(0);
+        rc = tox_bootstrap_main(2, args);
+        exit(rc);
     }
 
     return pid;
@@ -155,12 +158,12 @@ static void terminate(int sig)
     quit = 1;
 
     if (tox_bootstrap_pid > 0) {
-        kill(tox_bootstrap_pid, SIGINT);
+        kill(tox_bootstrap_pid, SIGTERM);
         tox_bootstrap_pid = -1;
     }
 
     if (turn_server_pid > 0) {
-        kill(turn_server_pid, SIGINT);
+        kill(turn_server_pid, SIGTERM);
         turn_server_pid = -1;
     }
 }
@@ -183,7 +186,7 @@ int main(int argc, char *argv[])
     const char *turn_server_config = NULL;
     const char *tox_bootstrap_config = NULL;
     bool run_in_foreground = false;
-
+    time_t startup_time;
 
     static struct option long_options[] = {
         {"turn-config",             required_argument, 0, 'r'}, 
@@ -266,8 +269,10 @@ int main(int argc, char *argv[])
     if (!run_in_foreground)
         daemonize();
 
-    spt_init(argc, argv);
-    setproctitle("Elastos-Bootstrap-Main");
+    //spt_init(argc, argv);
+    //setproctitle("Elastos-Bootstrap-Main");
+
+    startup_time = time(NULL);
 
     turn_server_pid = start_turn_server(turn_server_config);
     tox_bootstrap_pid = start_tox_bootstrap(tox_bootstrap_config);
@@ -281,7 +286,7 @@ int main(int argc, char *argv[])
 
         pid_t pid = waitpid(-1, &status, 0);
         if (pid == turn_server_pid) {
-            if (WIFEXITED(status)) {
+            if ((time(NULL) - startup_time) < 30 || WIFEXITED(status)) {
                 turn_server_pid = -1;
                 break;
             }
@@ -290,7 +295,7 @@ int main(int argc, char *argv[])
         }
 
         if (pid == tox_bootstrap_pid) {
-            if (WIFEXITED(status)) {
+            if ((time(NULL) - startup_time) < 30 || WIFEXITED(status)) {
                 tox_bootstrap_pid = -1;
                 break;
             }

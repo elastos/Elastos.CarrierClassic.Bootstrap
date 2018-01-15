@@ -21,16 +21,16 @@ OBJS = bootstrapd.o setproctitle.o
 
 .PHONY: all clean install
 
-all: elastos-bootstrapd
+all: ela-bootstrapd
 
-elastos-bootstrapd: $(OBJS)
+ela-bootstrapd: $(OBJS)
 	$(CC) -o $@ $(OBJS) $(LDFLAGS) -L$(INSTALL_LIBRARY_PATH) $(LIBS)
 
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 install: all
-	cp elastos-bootstrapd $(PREFIX)/bin
+	cp ela-bootstrapd $(PREFIX)/bin
 
 clean:
-	rm -rf elastos-bootstrapd *.o
+	rm -rf ela-bootstrapd *.o
