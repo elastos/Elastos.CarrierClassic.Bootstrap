@@ -15,7 +15,7 @@
 
 #include "setproctitle.h"
 
-#define PROGRAM_NAME                        "elastos-bootstrapd"
+#define PROGRAM_NAME                        "ela-bootstrapd"
 
 #define ELASTOS_BOOTSTRAP_VERSION           "5.0"
 #define ELASTOS_BOOTSTRAP_BUILD_NUMBER      20171203UL
@@ -56,13 +56,39 @@ static const char *get_config_file(const char *config,
 
 static void daemonize(void)
 {
+    FILE *pid_file;
+    char pid_file_path[PATH_MAX];
+
+    sprintf(pid_file_path, "/var/run/%s/%s.pid", PROGRAM_NAME, PROGRAM_NAME);
+
+    // Check if the PID file exists 
+    if ((pid_file = fopen(pid_file_path, "r"))) {
+        printf("Another instance of the daemon is already running, PID file %s exists.\n", pid_file_path);
+        fclose(pid_file);
+    }
+
+    // Open the PID file for writing
+    pid_file = fopen(pid_file_path, "w+");
+
+    if (pid_file == NULL) {
+        printf("Couldn't open the PID file for writing: %s. Exiting.\n", pid_file_path);
+        exit(1);
+    }
+
     // Fork off from the parent process
     const pid_t pid = fork();
 
     if (pid > 0) {
         // parent
+        fprintf(pid_file, "%d", pid);
+        fclose(pid_file);
+        printf("Forked successfully: PID: %d.\n", pid);
         exit(0);
-    } else if (pid < 0) {
+    } else{
+        fclose(pid_file);
+    } 
+
+    if (pid < 0) {
         printf("Forking failed, exiting.\n");
         exit(-1);
     }
@@ -155,6 +181,10 @@ pid_t tox_bootstrap_pid = -1;
 
 static void terminate(int sig)
 {
+    char pid_file_path[PATH_MAX];
+
+    sprintf(pid_file_path, "/var/run/%s/%s.pid", PROGRAM_NAME, PROGRAM_NAME);
+
     quit = 1;
 
     if (tox_bootstrap_pid > 0) {
@@ -166,6 +196,8 @@ static void terminate(int sig)
         kill(turn_server_pid, SIGTERM);
         turn_server_pid = -1;
     }
+
+    remove(pid_file_path);
 }
 
 static void print_help(void)

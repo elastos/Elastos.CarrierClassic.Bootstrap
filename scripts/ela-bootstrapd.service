@@ -4,8 +4,6 @@ After=network.target
 
 [Service]
 Type=forking
-RuntimeDirectory=ela-bootstrapd
-RuntimeDirectoryMode=750
 PIDFile=/var/run/ela-bootstrapd/ela-bootstrapd.pid
 WorkingDirectory=/var/lib/ela-bootstrapd
 ExecStart=/usr/bin/ela-bootstrapd --bootstrap-config=/etc/elastos/bootstrapd.conf --turn-config=/etc/elastos/turnserver.conf

@@ -8,7 +8,7 @@ CONFIG_COMMAND = $(shell scripts/coturn.sh "command" $(HOST) $(ARCH) $(HOST_COMP
 CONFIG_OPTIONS = --prefix=$(DIST_DIR) \
 				 --bindir=/bin --confdir=/etc/elastos --includedir=/include --libdir=/lib \
 				 --schemadir=/usr/share/elastos-turnserver --examplesdir=/usr/share/examples/elastos-turnserver \
-				 --docdir=/usr/share/doc/elastos-turnserver --manprefix=/usr/share --localstatedir=/var
+				 --docdir=/usr/share/doc/elastos-turnserver --manprefix=/usr/share --localstatedir=/var/lib/ela-bootstrapd
 
 define source-fetch
     @echo "Using local source in $(SRC_DIR) ..."
