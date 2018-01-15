@@ -27,6 +27,7 @@
 // system provided
 #include <sys/stat.h>
 #include <unistd.h>
+#include <limits.h>
 
 // C
 #include <stdio.h>
@@ -102,10 +103,19 @@ static int manage_keys(DHT *dht, char *keys_file_path)
 
 // Prints public key
 
-static void print_public_key(const uint8_t *public_key)
+static void print_public_key(const uint8_t *public_key, const char *public_key_file_path)
 {
     char buffer[2 * CRYPTO_PUBLIC_KEY_SIZE + 1];
+    FILE *key_file = NULL;
  
+    if (public_key_file_path) {
+        key_file = fopen(public_key_file_path, "w+");
+        if (key_file == NULL) {
+            log_write(LOG_LEVEL_ERROR, "Couldn't open the Public Key file for writing: %s. Exiting.\n", public_key_file_path);
+            exit(1);
+        }
+    }
+
  #ifndef ELASTOS_BUILD
     int index = 0;
 
@@ -118,6 +128,11 @@ static void print_public_key(const uint8_t *public_key)
     size_t len = sizeof(buffer);
     base58_encode(public_key, CRYPTO_PUBLIC_KEY_SIZE, buffer, &len);
 #endif
+
+    if (key_file != NULL) {
+        fprintf(key_file, "%s\n", buffer);
+        fclose(key_file);
+    }
 
     log_write(LOG_LEVEL_INFO, "Public Key: %s\n", buffer);
 }
@@ -211,6 +226,8 @@ int tox_bootstrap_main(int argc, char *argv[])
     log_write(LOG_LEVEL_INFO, "Running \"%s\" version %lu.\n", DAEMON_NAME, DAEMON_VERSION_NUMBER);
 
     char *pid_file_path, *keys_file_path;
+    char public_key_file_path[PATH_MAX];
+    char *p;
     int port;
     int enable_ipv6;
     int enable_ipv4_fallback;
@@ -298,6 +315,15 @@ int tox_bootstrap_main(int argc, char *argv[])
         return 1;
     }
 
+    strcpy(public_key_file_path, keys_file_path);
+    p = strrchr(public_key_file_path, '/');
+    if (p)
+        p++;
+    else
+        p = public_key_file_path;
+    strcpy(p, "public-key");
+    log_write(LOG_LEVEL_INFO, "Public key file: %s.\n", public_key_file_path);
+
     free(keys_file_path);
 
     TCP_Server *tcp_server = NULL;
@@ -328,7 +354,7 @@ int tox_bootstrap_main(int argc, char *argv[])
         return 1;
     }
 
-    print_public_key(dht->self_public_key);
+    print_public_key(dht->self_public_key, public_key_file_path);
 #ifdef ELASTOS_BUILD
     memcpy(bootstrap_secret_key, dht->self_secret_key, TOX_SECRET_KEY_SIZE);
 #endif

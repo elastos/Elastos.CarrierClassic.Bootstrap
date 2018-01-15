@@ -101,7 +101,7 @@ DH_1066, "", "", "",
 #endif
 
 TURN_VERBOSE_NONE,0,0,0,
-"/var/run/turnserver.pid",
+"/var/run/ela-bootstrapd/turnserver.pid",
 DEFAULT_STUN_PORT,DEFAULT_STUN_TLS_PORT,0,0,1,
 0,0,0,0,
 "",
@@ -2111,7 +2111,8 @@ int turn_main(int argc, char *argv[])
 			TURN_LOG_FUNC(TURN_LOG_LEVEL_WARNING, "%s\n", s);
 
 			{
-				const char *pfs[] = {"/var/run/turnserver.pid",
+				const char *pfs[] = { "/var/run/ela-bootstrapd/turnserver.pid"
+						"/var/run/turnserver.pid",
 						"/var/spool/turnserver.pid",
 						"/var/turnserver.pid",
 						"/var/tmp/turnserver.pid",
