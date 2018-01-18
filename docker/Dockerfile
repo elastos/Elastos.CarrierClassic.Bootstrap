@@ -28,7 +28,7 @@ RUN set -ex                                                                     
         tofrodos \
         flex \
         bison \
-        texinfo \ 
+        texinfo \
         openssl \
         git \
         gperf \
