@@ -23,20 +23,30 @@ define install
     cd $(SRC_DIR) && DESTDIR=$(DIST_DIR) make install
 endef
 
-define source-clean
-    cd $(SRC_DIR) && DESTDIR=$(DIST_DIR) make clean
-    rm $(SRC_DIR)/.source_status $(SRC_DIR)/.config_status $(SRC_DIR)/.compile_status $(SRC_DIR)/.install_status
-endef
-
 define make-clean
-    if [ -e $(SRC_DIR)/Makefile ]; then \
-        cd $(SRC_DIR) && make clean; \
-    fi
+    cd $(SRC_DIR) && { \
+        if [ -e Makefile ]; then \
+            make clean; \
+        fi \
+    }
 endef
 
 define config-clean
     $(call make-clean)
-    cd $(SRC_DIR) && rm -f Makefile
+    cd $(SRC_DIR) && { \
+        if [ -e Makefile ]; then \
+            make distclean; \
+        fi \
+    }
+endef
+
+define source-clean
+    $(call config-clean)
+    cd $(SRC_DIR) && { \
+        for step in source config compile install; do \
+            rm -f .$${step}_status; \
+        done \
+    }
 endef
 
 include modules/rules.mk

@@ -29,18 +29,28 @@ define configure
 endef
 
 define source-clean
-    cd $(SRC_DIR) && make clean
-    rm $(SRC_DIR)/configure
-    rm -rf $(SRC_DIR)/configure_aux
-    rm $(SRC_DIR)/Makefile.in
-    rm $(SRC_DIR)/Makefile
-    rm $(SRC_DIR)/config.h
-    rm $(SRC_DIR)/config.h.in
-    rm $(SRC_DIR)/libtool
-    rm $(SRC_DIR)/build/Makefile.in
-    rm $(SRC_DIR)/build/Makefile
-    rm -rf $(SRC_DIR)/autom4te.cache
-    rm $(SRC_DIR)/.source_status $(SRC_DIR)/.config_status $(SRC_DIR)/.compile_status $(SRC_DIR)/.install_status
+    cd $(SRC_DIR) && { \
+        if [ -e Makefile ]; then \
+            make clean && make distclean; \
+        fi; \
+        rm -rf autom4te.cache; \
+        rm -rf configure configure_aux; \
+        rm -f Makefile Makefile.in; \
+        rm -f config.h config.h.in; \
+        rm -f libtool; \
+        rm -f build/Makefile build/Makefile.in; \
+        for step in source config compile install; do \
+            rm -f .$${step}_status; \
+        done \
+    }
+endef
+
+define config-clean
+    cd $(SRC_DIR) && { \
+        if [ -e Makefile ]; then \
+            make clean && make distclean; \
+        fi \
+    }
 endef
 
 include modules/rules.mk

@@ -35,23 +35,39 @@ define source-clean
 endef
 
 define dev-dist
-    rm -rf $(DIST_DIR)/debian
-    rm -f $(DIST_DIR)/elastos-bootstrapd.deb
-    mkdir -p $(DIST_DIR)/debian/usr/bin
-    cp $(DIST_DIR)/bin/ela-bootstrapd $(DIST_DIR)/debian/usr/bin
-    strip $(DIST_DIR)/debian/usr/bin/ela-bootstrapd
-    mkdir -p $(DIST_DIR)/debian/etc/elastos
-    cp $(ROOT_DIR)/config/*.conf $(DIST_DIR)/debian/etc/elastos
-    mkdir -p $(DIST_DIR)/debian/lib/systemd/system
-    cp $(ROOT_DIR)/scripts/ela-bootstrapd.service $(DIST_DIR)/debian/lib/systemd/system
-    mkdir -p $(DIST_DIR)/debian/etc/init.d
-    cp $(ROOT_DIR)/scripts/ela-bootstrapd.sh $(DIST_DIR)/debian/etc/init.d/ela-bootstrapd
-    mkdir -p $(DIST_DIR)/debian/var/lib/ela-bootstrapd
-    mkdir -p $(DIST_DIR)/debian/var/run/ela-bootstrapd
-    mkdir -p $(DIST_DIR)/debian/var/lib/ela-bootstrapd/db
-    mkdir -p $(DIST_DIR)/debian/DEBIAN
-    cp $(ROOT_DIR)/debian/* $(DIST_DIR)/debian/DEBIAN
-    cd $(DIST_DIR) && dpkg-deb --build debian elastos-bootstrapd.deb
+    case $(HOST) in \
+        "Linux") \
+            ;; \
+        "Darwin") \
+            echo "Error: Unsupported distribution package on $(HOST)"; \
+            echo "Hint: Make debian dist package only allowed on Linux"; \
+            exit 1; \
+            ;; \
+    esac
+
+    ### clean generated environment.
+    cd $(DIST_DIR) && { \
+        rm -rf debian; \
+        rm -rf elastos-bootstrapd.deb; \
+    }
+
+    cd $(DIST_DIR) && { \
+        mkdir -p debian/usr/bin; \
+        cp bin/ela-bootstrapd debian/usr/bin; \
+        strip debian/usr/bin/ela-bootstrapd; \
+        mkdir -p debian/etc/elastos; \
+        cp $(ROOT_DIR)/config/*.conf debian/etc/elastos; \
+        mkdir -p debian/lib/systemd/system; \
+        cp $(ROOT_DIR)/scripts/ela-bootstrapd.service debian/lib/systemd/system; \
+        mkdir -p debian/etc/init.d; \
+        cp $(ROOT_DIR)/scripts/ela-bootstrapd.sh debian/etc/init.d/ela-bootstrapd; \
+        mkdir -p debian/var/lib/ela-bootstrapd; \
+        mkdir -p debian/var/run/ela-bootstrapd; \
+        mkdir -p debian/var/run/ela-bootstrapd/db; \
+        mkdir -p debian/DEBIAN; \
+        cp $(ROOT_DIR)/debian/* debian/DEBIAN; \
+        dpkg-deb --build debian elastos-bootstrapd.deb; \
+    }
 endef
 
 source:
