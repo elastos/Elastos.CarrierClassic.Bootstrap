@@ -1,9 +1,11 @@
 [Unit]
 Description=Elastos Carrier Bootstrap Daemon
-After=network.target
+After=network-online.target
 
 [Service]
 Type=forking
+RuntimeDirectory=ela-bootstrapd
+RuntimeDirectoryMode=755
 PIDFile=/var/run/ela-bootstrapd/ela-bootstrapd.pid
 WorkingDirectory=/var/lib/ela-bootstrapd
 ExecStart=/usr/bin/ela-bootstrapd --config=/etc/elastos/bootstrapd.conf

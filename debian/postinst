@@ -32,7 +32,9 @@ case "$1" in
 
     chperms ela-bootstrapd ela-bootstrapd 0775 /var/run/ela-bootstrapd
 
-    chperms root ela-bootstrapd 0755 /etc/elastos/*
+    chperms root ela-bootstrapd 0755 /etc/elastos
+
+    chperms root ela-bootstrapd 0644 /etc/elastos/bootstrapd.conf
 
   ;;
 esac

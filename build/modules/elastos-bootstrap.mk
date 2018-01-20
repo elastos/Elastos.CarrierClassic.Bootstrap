@@ -56,14 +56,13 @@ define dev-dist
         cp bin/ela-bootstrapd debian/usr/bin; \
         strip debian/usr/bin/ela-bootstrapd; \
         mkdir -p debian/etc/elastos; \
-        cp $(ROOT_DIR)/config/*.conf debian/etc/elastos; \
+        cp $(ROOT_DIR)/config/bootstrapd.conf debian/etc/elastos; \
         mkdir -p debian/lib/systemd/system; \
         cp $(ROOT_DIR)/scripts/ela-bootstrapd.service debian/lib/systemd/system; \
         mkdir -p debian/etc/init.d; \
         cp $(ROOT_DIR)/scripts/ela-bootstrapd.sh debian/etc/init.d/ela-bootstrapd; \
         mkdir -p debian/var/lib/ela-bootstrapd; \
-        mkdir -p debian/var/run/ela-bootstrapd; \
-        mkdir -p debian/var/run/ela-bootstrapd/db; \
+        mkdir -p debian/var/lib/ela-bootstrapd/db; \
         mkdir -p debian/DEBIAN; \
         cp $(ROOT_DIR)/debian/* debian/DEBIAN; \
         dpkg-deb --build debian elastos-bootstrapd.deb; \
