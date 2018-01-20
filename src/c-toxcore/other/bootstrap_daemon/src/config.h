@@ -49,4 +49,15 @@ int get_general_config(const char *cfg_file_path, char **pid_file_path, char **k
  */
 int bootstrap_from_config(const char *cfg_file_path, DHT *dht, int enable_ipv6);
 
+#ifdef ELASTOS_BUILD
+/*
+ * Get TURN server config options from the config file.
+ *
+ * @return 1 on success, some or no bootstrap nodes were added
+ *         0 on failure, a error accured while parsing config file.
+ */
+int get_turn_config(const char *cfg_file_path, int *port, char **realm, 
+                    char **pid_file_path, char **userdb, int *verbose);
+#endif
+
 #endif // CONFIG_H

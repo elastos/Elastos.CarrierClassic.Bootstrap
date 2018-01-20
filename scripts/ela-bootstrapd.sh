@@ -14,9 +14,8 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Elastos Carrier bootstrap daemon"
 NAME=ela-bootstrapd
 DAEMON=/usr/bin/$NAME
-BOOTSTRAP_CONFIG_FILE=/etc/elastos/bootstrapd.conf
-TURNSERVER_CONFIG_FILE=/etc/elastos/turnserver.conf
-DAEMON_ARGS="--bootstrap-config=$BOOTSTRAP_CONFIG_FILE --turn-config=$TURNSERVER_CONFIG_FILE"
+CONFIG_FILE=/etc/elastos/bootstrapd.conf
+DAEMON_ARGS="--config=$CONFIG_FILE"
 PIDDIR=/var/run/$NAME
 PIDFILE=$PIDDIR/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME

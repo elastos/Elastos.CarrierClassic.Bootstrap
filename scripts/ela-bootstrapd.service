@@ -6,7 +6,7 @@ After=network.target
 Type=forking
 PIDFile=/var/run/ela-bootstrapd/ela-bootstrapd.pid
 WorkingDirectory=/var/lib/ela-bootstrapd
-ExecStart=/usr/bin/ela-bootstrapd --bootstrap-config=/etc/elastos/bootstrapd.conf --turn-config=/etc/elastos/turnserver.conf
+ExecStart=/usr/bin/ela-bootstrapd --config=/etc/elastos/bootstrapd.conf
 User=ela-bootstrapd
 Group=ela-bootstrapd
 CapabilityBoundingSet=CAP_NET_BIND_SERVICE

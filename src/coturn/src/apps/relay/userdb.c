@@ -399,9 +399,9 @@ static char *get_real_username(char *usname)
 #include <sodium.h>
 #include <tox/tox.h>
 
-#define TOX_AUTH_REALM_SUFFIX		"auth.tox"
+#define TOX_AUTH_SUFFIX			"auth.tox"
 
-void tox_bootstrap_get_secret_key(uint8_t *secret_key);
+void bootstrap_get_secret_key(uint8_t *secret_key);
 char *base58_encode(const void *data, size_t len, char *text, size_t *textlen);
 ssize_t base58_decode(const char *text, size_t textlen, void *data, size_t datalen);
 #endif
@@ -638,9 +638,10 @@ int get_user_key(int in_oauth, int *out_oauth, int *max_session_time, u08bits *u
 	}
 
 #if defined(ELASTOS_BUILD)
-	if (realm && *realm) {
-		char *sep = strchr((const char *)realm, '.');
-		if (sep != NULL && *(sep + 1) && strcmp(sep + 1, TOX_AUTH_REALM_SUFFIX) == 0) {
+	char *at = strchr((const char*)usname, '@');
+	if (at && *(at + 1)) {
+		char *dot = strchr((const char *)at, '.');
+		if (dot && *(dot + 1) && strcmp(dot + 1, TOX_AUTH_SUFFIX) == 0) {
 			uint8_t nonce[crypto_box_NONCEBYTES];
 			uint8_t userpk[TOX_PUBLIC_KEY_SIZE];
 			uint8_t bootstrap_secret_key[TOX_SECRET_KEY_SIZE];
@@ -649,20 +650,22 @@ int get_user_key(int in_oauth, int *out_oauth, int *max_session_time, u08bits *u
 			char pwd[crypto_auth_hmacsha256_BYTES * 2];
 			size_t pwd_len = sizeof(pwd);
 
-			if (base58_decode((const char *)realm, sep - (char *)realm, nonce, sizeof(nonce)) != sizeof(nonce)) {
-				TURN_LOG_FUNC(TURN_LOG_LEVEL_ERROR, "Tox authenticate whit wrong NONCE.");
+			TURN_LOG_FUNC(TURN_LOG_LEVEL_INFO, "Using bootstrap integrated authentication.\n");
+
+			if (base58_decode((const char *)at + 1, dot - at - 1, nonce, sizeof(nonce)) != sizeof(nonce)) {
+				TURN_LOG_FUNC(TURN_LOG_LEVEL_ERROR, "Bootstrap integrated authenticate with wrong NONCE.");
 				return -1;
 			}
 
-			if (base58_decode((const char *)usname, strlen((const char *)usname), userpk, sizeof(userpk)) != sizeof(userpk)) {
-				TURN_LOG_FUNC(TURN_LOG_LEVEL_ERROR, "Tox authenticate with wrong user ID.");
+			if (base58_decode((const char *)usname, at - (char *)usname, userpk, sizeof(userpk)) != sizeof(userpk)) {
+				TURN_LOG_FUNC(TURN_LOG_LEVEL_ERROR, "Bootstrap integrated authenticate with wrong user ID.");
 				return -1;
 			}
 
-			tox_bootstrap_get_secret_key(bootstrap_secret_key);
+			bootstrap_get_secret_key(bootstrap_secret_key);
 			
 			if (crypto_box_beforenm(shared_key, userpk, bootstrap_secret_key) < 0) {
-				TURN_LOG_FUNC(TURN_LOG_LEVEL_ERROR, "Tox authenticate with wrong user ID.");
+				TURN_LOG_FUNC(TURN_LOG_LEVEL_ERROR, "Bootstrap integrated authenticate with wrong user ID.");
 				return -1;
 			}
 
@@ -674,6 +677,8 @@ int get_user_key(int in_oauth, int *out_oauth, int *max_session_time, u08bits *u
 			return 0;
 		}
 	}
+
+	TURN_LOG_FUNC(TURN_LOG_LEVEL_INFO, "Fallback to default DB authentication.\n");	
 #endif
 
 	const turn_dbdriver_t * dbd = get_dbdriver();

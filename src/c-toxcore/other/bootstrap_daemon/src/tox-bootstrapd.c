@@ -151,7 +151,7 @@ static void daemonize(LOG_BACKEND log_backend, char *pid_file_path)
     }
 
     // Open the PID file for writing
-    pid_file = fopen(pid_file_path, "a+");
+    pid_file = fopen(pid_file_path, "w+");
 
     if (pid_file == NULL) {
         log_write(LOG_LEVEL_ERROR, "Couldn't open the PID file for writing: %s. Exiting.\n", pid_file_path);
@@ -181,7 +181,7 @@ static void daemonize(LOG_BACKEND log_backend, char *pid_file_path)
         exit(1);
     }
 
-
+#if 0
     // Change the current working directory
     if ((chdir("/")) < 0) {
         log_write(LOG_LEVEL_ERROR, "Couldn't change working directory to '/'. Exiting.\n");
@@ -194,17 +194,16 @@ static void daemonize(LOG_BACKEND log_backend, char *pid_file_path)
         close(STDIN_FILENO);
         close(STDERR_FILENO);
     }
+#endif
 }
 
 #ifndef ELASTOS_BUILD
 int main(int argc, char *argv[])
 #else
-uint8_t bootstrap_secret_key[TOX_SECRET_KEY_SIZE];
+#include <signal.h>
 
-void tox_bootstrap_get_secret_key(uint8_t *secret_key)
-{
-    memcpy(secret_key, bootstrap_secret_key, TOX_SECRET_KEY_SIZE);
-}
+pid_t start_turn_server(int port, const char *realm, const char *pid_file, 
+                        const char *userdb, int verbose, uint8_t *secret_key);
 
 int tox_bootstrap_main(int argc, char *argv[])
 #endif
@@ -252,11 +251,9 @@ int tox_bootstrap_main(int argc, char *argv[])
         return 1;
     }
 
-#ifndef ELASTOS_BUILD
     if (!run_in_foreground) {
         daemonize(log_backend, pid_file_path);
     }
-#endif
 
     free(pid_file_path);
 
@@ -355,9 +352,6 @@ int tox_bootstrap_main(int argc, char *argv[])
     }
 
     print_public_key(dht->self_public_key, public_key_file_path);
-#ifdef ELASTOS_BUILD
-    memcpy(bootstrap_secret_key, dht->self_secret_key, TOX_SECRET_KEY_SIZE);
-#endif
 
     uint64_t last_LANdiscovery = 0;
     const uint16_t net_htons_port = net_htons(port);
@@ -368,6 +362,29 @@ int tox_bootstrap_main(int argc, char *argv[])
         LANdiscovery_init(dht);
         log_write(LOG_LEVEL_INFO, "Initialized LAN discovery successfully.\n");
     }
+
+#ifdef ELASTOS_BUILD
+    pid_t turn_pid = 0;
+
+    {
+        int turn_port = 0;
+        char *turn_realm = NULL;
+        char *turn_pid_file = NULL;
+        char *turn_userdb = NULL;
+        int turn_verbose = 0;
+
+        if (get_turn_config(cfg_file_path, &turn_port, &turn_realm, &turn_pid_file, &turn_userdb, &turn_verbose)) {
+            log_write(LOG_LEVEL_INFO, "TURN config read successfully\n");
+        } else {
+            log_write(LOG_LEVEL_ERROR, "Couldn't read config file: %s. Exiting.\n", cfg_file_path);
+            return 1;
+        }
+
+        turn_pid = start_turn_server(turn_port, turn_realm, turn_pid_file, turn_userdb, turn_verbose, dht->self_secret_key);
+        if (turn_pid < 0)
+            return 1;
+    }
+#endif
 
     while (1) {
         do_DHT(dht);
@@ -390,4 +407,9 @@ int tox_bootstrap_main(int argc, char *argv[])
 
         SLEEP_MILLISECONDS(30);
     }
+
+#ifdef ELASTOS_BUILD
+    if (turn_pid > 0)
+        kill(turn_pid, SIGTERM);
+#endif
 }
