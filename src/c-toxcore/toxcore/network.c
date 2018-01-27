@@ -424,7 +424,7 @@ int sendpacket(Networking_Core *net, IP_Port ip_port, const uint8_t *data, uint1
 
     loglogdata(net->log, "O=>", data, length, ip_port, res);
 
-    return res;
+    return res > 0 ? (res - ela_magic_size()) : res;
 }
 
 /* Function to receive data
