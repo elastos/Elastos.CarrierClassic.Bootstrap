@@ -41,7 +41,7 @@ case "$1" in
 
     *)
         echo "Usage: $0 [ module ] [ arch ] [ target ] [ build ]"
-        echo "module options(default toxcore):"
+        echo "module options(default elastos-bootstrap):"
         echo "    libsodium    | libevent     | coturn   | toxcore"
         echo "    elastos-bootstrap"
         echo ""
