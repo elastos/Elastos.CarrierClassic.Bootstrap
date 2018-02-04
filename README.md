@@ -16,7 +16,7 @@ Run the following commands to install all pre-requirements.
 
 ```
 $ sudo apt-get update
-$ sudo apt-get install build-essential autoconf automake autopoint libtool bison
+$ sudo apt-get install build-essential autoconf automake autopoint libtool bison texinfo
 ```
 
 #### 2. Build
