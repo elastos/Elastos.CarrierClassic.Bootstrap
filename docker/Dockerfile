@@ -25,6 +25,7 @@ RUN set -ex                                                                     
         libtool \
         build-essential \
         net-tools \
+        fakeroot \
         tofrodos \
         flex \
         bison \
