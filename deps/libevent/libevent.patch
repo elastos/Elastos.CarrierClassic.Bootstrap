@@ -1,0 +1,12 @@
+diff -ru libevent-2.1.8-stable/openssl-compat.h libevent-2.1.8-stable-mod/openssl-compat.h
+--- libevent-2.1.8-stable/openssl-compat.h	2016-12-07 06:13:44.000000000 +0800
++++ libevent-2.1.8-stable-mod/openssl-compat.h	2018-07-25 16:33:19.000000000 +0800
+@@ -32,4 +32,8 @@
+ 
+ #endif /* OPENSSL_VERSION_NUMBER < 0x10100000L */
+ 
++#ifdef LIBRESSL_VERSION_NUMBER
++#define BIO_get_init(b) (b)->init
++#endif
++
+ #endif /* OPENSSL_COMPAT_H */

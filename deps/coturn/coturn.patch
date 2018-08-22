@@ -1,0 +1,520 @@
+diff -ruN coturn-4.5.0.6/Makefile.in coturn-4.5.0.6-mod/Makefile.in
+--- coturn-4.5.0.6/Makefile.in	2017-03-27 11:11:03.000000000 +0800
++++ coturn-4.5.0.6-mod/Makefile.in	2018-07-28 17:03:05.000000000 +0800
+@@ -1,19 +1,19 @@
+ 
+ LIBEVENT_INCLUDE = -I${PREFIX}/include/ -I/usr/local/include/
+ 
+-INCFLAGS = -Isrc -Isrc/apps/common -Isrc/server -Isrc/client -Isrc/client++ ${LIBEVENT_INCLUDE} 
++INCFLAGS = -Isrc -Isrc/apps/common -Isrc/server -Isrc/client -Isrc/client++ ${LIBEVENT_INCLUDE}
+ 
+ CFLAGS += ${INCFLAGS}
+ 
+ MAKE_DEPS = Makefile
+ 
+ LIBCLIENTTURN_HEADERS = src/ns_turn_defs.h src/client++/TurnMsgLib.h src/client/ns_turn_ioaddr.h src/client/ns_turn_msg.h src/client/ns_turn_msg_defs.h src/client/ns_turn_msg_defs_experimental.h src/client/ns_turn_msg_addr.h
+-LIBCLIENTTURN_MODS = src/client/ns_turn_ioaddr.c src/client/ns_turn_msg_addr.c src/client/ns_turn_msg.c 
+-LIBCLIENTTURN_DEPS = ${LIBCLIENTTURN_HEADERS} ${MAKE_DEPS} 
+-LIBCLIENTTURN_OBJS = build/obj/ns_turn_ioaddr.o build/obj/ns_turn_msg_addr.o build/obj/ns_turn_msg.o 
++LIBCLIENTTURN_MODS = src/client/ns_turn_ioaddr.c src/client/ns_turn_msg_addr.c src/client/ns_turn_msg.c
++LIBCLIENTTURN_DEPS = ${LIBCLIENTTURN_HEADERS} ${MAKE_DEPS}
++LIBCLIENTTURN_OBJS = build/obj/ns_turn_ioaddr.o build/obj/ns_turn_msg_addr.o build/obj/ns_turn_msg.o
+ 
+-SERVERTURN_HEADERS = src/server/ns_turn_allocation.h src/server/ns_turn_ioalib.h src/server/ns_turn_khash.h src/server/ns_turn_maps_rtcp.h src/server/ns_turn_maps.h src/server/ns_turn_server.h src/server/ns_turn_session.h 
+-SERVERTURN_DEPS = ${LIBCLIENTTURN_HEADERS} ${SERVERTURN_HEADERS} ${MAKE_DEPS} 
++SERVERTURN_HEADERS = src/server/ns_turn_allocation.h src/server/ns_turn_ioalib.h src/server/ns_turn_khash.h src/server/ns_turn_maps_rtcp.h src/server/ns_turn_maps.h src/server/ns_turn_server.h src/server/ns_turn_session.h
++SERVERTURN_DEPS = ${LIBCLIENTTURN_HEADERS} ${SERVERTURN_HEADERS} ${MAKE_DEPS}
+ SERVERTURN_MODS = ${LIBCLIENTTURN_MODS} src/server/ns_turn_allocation.c src/server/ns_turn_maps_rtcp.c src/server/ns_turn_maps.c src/server/ns_turn_server.c
+ 
+ COMMON_HEADERS = src/apps/common/apputils.h src/apps/common/ns_turn_openssl.h src/apps/common/ns_turn_utils.h src/apps/common/stun_buffer.h
+@@ -34,7 +34,15 @@
+ SERVERAPP_MODS = src/apps/relay/mainrelay.c src/apps/relay/netengine.c src/apps/relay/libtelnet.c src/apps/relay/turn_admin_server.c src/apps/relay/userdb.c src/apps/relay/tls_listener.c src/apps/relay/dtls_listener.c ${HIREDIS_MODS} ${USERDB_MODS}
+ SERVERAPP_DEPS = ${SERVERTURN_MODS} ${SERVERTURN_DEPS} ${SERVERAPP_MODS} ${SERVERAPP_HEADERS} ${COMMON_DEPS} ${IMPL_DEPS} lib/libturnclient.a
+ 
+-TURN_BUILD_RESULTS = bin/turnutils_oauth bin/turnutils_natdiscovery bin/turnutils_stunclient bin/turnutils_rfc5769check bin/turnutils_uclient bin/turnserver bin/turnutils_peer lib/libturnclient.a include/turn/ns_turn_defs.h sqlite_empty_db
++IMPL_LOBJS = $(IMPL_MODS:.c=.lo)
++SERVERAPP_LOBJS = $(SERVERAPP_MODS:.c=.lo)
++COMMON_LOBJS = $(COMMON_MODS:.c=.lo)
++SERVERTURN_LOBJS = $(SERVERTURN_MODS:.c=.lo)
++
++TURN_BUILD_RESULTS = bin/turnutils_oauth bin/turnutils_natdiscovery bin/turnutils_stunclient bin/turnutils_rfc5769check bin/turnutils_uclient bin/turnserver bin/turnutils_peer lib/libturnserver.a lib/libturnclient.a include/turn/ns_turn_defs.h sqlite_empty_db
++
++.SUFFIXES:
++.SUFFIXES: .c .lo .o
+ 
+ all:	${TURN_BUILD_RESULTS}
+ 
+@@ -52,7 +60,7 @@
+ 
+ bin/turnutils_uclient:	${COMMON_DEPS} src/apps/uclient/session.h lib/libturnclient.a src/apps/uclient/mainuclient.c src/apps/uclient/uclient.c src/apps/uclient/uclient.h src/apps/uclient/startuclient.c src/apps/uclient/startuclient.h
+ 	${MKBUILDDIR} bin
+-	${CC} ${CPPFLAGS} ${CFLAGS} src/apps/uclient/uclient.c src/apps/uclient/startuclient.c src/apps/uclient/mainuclient.c ${COMMON_MODS} -o $@ -Llib -lturnclient -Llib ${LDFLAGS}  
++	${CC} ${CPPFLAGS} ${CFLAGS} src/apps/uclient/uclient.c src/apps/uclient/startuclient.c src/apps/uclient/mainuclient.c ${COMMON_MODS} -o $@ -Llib -lturnclient -Llib ${LDFLAGS}
+ 
+ bin/turnutils_natdiscovery:	${COMMON_DEPS} lib/libturnclient.a src/apps/natdiscovery/natdiscovery.c
+ 	pwd
+@@ -64,25 +72,31 @@
+ 	${MKBUILDDIR} bin
+ 	${CC} ${CPPFLAGS} ${CFLAGS} src/apps/oauth/oauth.c ${COMMON_MODS} -o $@ -Llib -lturnclient -Llib ${LDFLAGS}
+ 
+-bin/turnutils_stunclient:	${COMMON_DEPS} lib/libturnclient.a src/apps/stunclient/stunclient.c 
++bin/turnutils_stunclient:	${COMMON_DEPS} lib/libturnclient.a src/apps/stunclient/stunclient.c
+ 	pwd
+ 	${MKBUILDDIR} bin
+-	${CC} ${CPPFLAGS} ${CFLAGS} src/apps/stunclient/stunclient.c ${COMMON_MODS} -o $@ -Llib -lturnclient -Llib ${LDFLAGS}   
++	${CC} ${CPPFLAGS} ${CFLAGS} src/apps/stunclient/stunclient.c ${COMMON_MODS} -o $@ -Llib -lturnclient -Llib ${LDFLAGS}
+ 
+-bin/turnutils_rfc5769check:	${COMMON_DEPS} lib/libturnclient.a src/apps/rfc5769/rfc5769check.c 
++bin/turnutils_rfc5769check:	${COMMON_DEPS} lib/libturnclient.a src/apps/rfc5769/rfc5769check.c
+ 	pwd
+ 	${MKBUILDDIR} bin
+-	${CC} ${CPPFLAGS} ${CFLAGS} src/apps/rfc5769/rfc5769check.c ${COMMON_MODS} -o $@ -Llib -lturnclient -Llib ${LDFLAGS} 
++	${CC} ${CPPFLAGS} ${CFLAGS} src/apps/rfc5769/rfc5769check.c ${COMMON_MODS} -o $@ -Llib -lturnclient -Llib ${LDFLAGS}
+ 
+ bin/turnserver:	${SERVERAPP_DEPS}
+ 	${MKBUILDDIR} bin
+ 	${RMCMD} bin/turnadmin
+-	${CC} ${CPPFLAGS} ${CFLAGS} ${DBCFLAGS} ${IMPL_MODS} -Ilib ${SERVERAPP_MODS} ${COMMON_MODS} ${SERVERTURN_MODS} -o $@ ${DBLIBS} ${LDFLAGS} 
+-	cd bin; ln -s turnserver turnadmin  
++	${CC} ${CPPFLAGS} ${CFLAGS} ${DBCFLAGS} ${IMPL_MODS} -Ilib ${SERVERAPP_MODS} ${COMMON_MODS} ${SERVERTURN_MODS} -o $@ ${DBLIBS} ${LDFLAGS}
++	cd bin; ln -s turnserver turnadmin
+ 
+ bin/turnutils_peer:	${COMMON_DEPS} ${LIBCLIENTTURN_MODS} ${LIBCLIENTTURN_DEPS} lib/libturnclient.a src/apps/peer/mainudpserver.c src/apps/peer/udpserver.h src/apps/peer/udpserver.c
+ 	${MKBUILDDIR} bin
+-	${CC} ${CPPFLAGS} ${CFLAGS} src/apps/peer/mainudpserver.c src/apps/peer/udpserver.c ${COMMON_MODS} -o $@ -Llib -lturnclient -Llib ${LDFLAGS}  
++	${CC} ${CPPFLAGS} ${CFLAGS} src/apps/peer/mainudpserver.c src/apps/peer/udpserver.c ${COMMON_MODS} -o $@ -Llib -lturnclient -Llib ${LDFLAGS}
++
++### Turn Server Library:
++
++lib/libturnserver.a:	${IMPL_LOBJS} ${SERVERAPP_LOBJS} ${COMMON_LOBJS} ${SERVERTURN_LOBJS}
++	${MKBUILDDIR} lib
++	${ARCHIVERCMD} $@ ${IMPL_LOBJS} ${SERVERAPP_LOBJS} ${COMMON_LOBJS} ${SERVERTURN_LOBJS}
+ 
+ ### Client Library:
+ 
+@@ -102,12 +116,17 @@
+ 	${MKBUILDDIR} build/obj
+ 	${CC} ${CPPFLAGS} ${CFLAGS} -c src/client/ns_turn_msg.c -o $@
+ 
++.c.lo:
++	${CC} -c ${CPPFLAGS} ${CFLAGS} ${DBCFLAGS} -DWHISPER_BUILD -Ilib -o $@ $<
++
+ ### Clean all:
+ 
+-clean:	
+-	${RMCMD} bin build lib obj *bak *~ */*~ */*/*~ */*/*/*~ *core */*core */*/*core include Makefile tmp sqlite
++clean:
++	${RMCMD} bin build lib obj *bak *~ */*~ */*/*~ */*/*/*~ *core */*core */*/*core include tmp sqlite
++	${RMCMD} ${IMPL_LOBJS} ${SERVERAPP_LOBJS} ${COMMON_LOBJS} ${SERVERTURN_LOBJS}
+ 
+ distclean:	clean
++	${RMCMD} Makefile
+ 
+ ### SQLite empty database:
+ sqlite_empty_db	:	sqlite/turndb
+@@ -147,6 +166,7 @@
+ 	${INSTALL_MAN} man/man1/turnutils_peer.1 ${DESTDIR}${MANPREFIX}/man/man1/
+ 	${INSTALL_MAN} man/man1/coturn.1 ${DESTDIR}${MANPREFIX}/man/man1/
+ 	${INSTALL_STATIC_LIB} lib/libturnclient.a ${DESTDIR}${LIBDIR}
++	${INSTALL_STATIC_LIB} lib/libturnserver.a ${DESTDIR}${LIBDIR}
+ 	${INSTALL_DATA} LICENSE ${DESTDIR}${DOCSDIR}
+ 	${INSTALL_DATA} README.turnserver ${DESTDIR}${DOCSDIR}
+ 	${INSTALL_DATA} README.turnadmin ${DESTDIR}${DOCSDIR}
+@@ -195,6 +215,7 @@
+ 	${RMCMD} ${DESTDIR}${MANPREFIX}/man/man1/turnutils_peer.1
+ 	${RMCMD} ${DESTDIR}${MANPREFIX}/man/man1/coturn.1
+ 	${RMCMD} ${DESTDIR}${LIBDIR}/libturnclient.a
++	${RMCMD} ${DESTDIR}${LIBDIR}/libturnserver.a
+ 	${RMCMD} ${DESTDIR}${EXAMPLESDIR}
+ 	${RMCMD} ${DESTDIR}${CONFDIR}/turnserver.conf.default
+ 	${RMCMD} ${DESTDIR}${TURNINCLUDEDIR}
+diff -ruN coturn-4.5.0.6/configure coturn-4.5.0.6-mod/configure
+--- coturn-4.5.0.6/configure	2017-03-27 11:11:03.000000000 +0800
++++ coturn-4.5.0.6-mod/configure	2018-07-28 17:26:18.000000000 +0800
+@@ -1,5 +1,10 @@
+ #!/bin/sh
+ 
++TURN_NO_PQ=yes
++TURN_NO_MYSQL=yes
++TURN_NO_MONGO=yes
++TURN_NO_HIREDIS=yes
++
+ # Proprietary configure script of Coturn project
+ 
+ cleanup() {
+@@ -100,7 +105,7 @@
+ 	fi
+     done
+     POSTLIBS="${OSLIBS} ${POSTLIBS} -lpq"
+-    ${CC} ${PQ_TMPCPROGC} -o ${PQ_TMPCPROGB} ${OSCFLAGS} ${DBCFLAGS} ${POSTCFLAGS} ${DBLIBS} ${POSTLIBS} ${OSLIBS} 2>>/dev/null 
++    ${CC} ${PQ_TMPCPROGC} -o ${PQ_TMPCPROGB} ${OSCFLAGS} ${DBCFLAGS} ${POSTCFLAGS} ${DBLIBS} ${POSTLIBS} ${OSLIBS} 2>>/dev/null
+     ER=$?
+     if ! [ ${ER} -eq 0 ] ; then
+     	${ECHO_CMD}
+@@ -211,7 +216,7 @@
+     else
+     	OSLIBS="${OSLIBS} ${PTHREAD_LIBS}"
+     fi
+-		
++
+ 
+     ${CC} ${TH_TMPCPROGC} -o ${TH_TMPCPROGB} ${OSCFLAGS} ${OSLIBS} 2>>/dev/null
+     ER=$?
+@@ -225,10 +230,10 @@
+ 	    	OSCFLAGS="${OSCFLAGS} -D_GNU_SOURCE"
+ 	    	return 1
+ 	    else
+-    		${ECHO_CMD} "Do not use pthreads" 
++    		${ECHO_CMD} "Do not use pthreads"
+ 		fi
+     fi
+-    
++
+     return 0
+ }
+ 
+@@ -296,11 +301,11 @@
+ #########################
+ 
+ if [ -z "${ECHO_CMD}" ] ; then
+-	ECHO_CMD=echo 
++	ECHO_CMD=echo
+ fi
+ 
+ if [ -z "${FIND_CMD}" ] ; then
+-	FIND_CMD=find 
++	FIND_CMD=find
+ fi
+ 
+ if [ -z "${PORTNAME}" ] ; then
+@@ -397,12 +402,12 @@
+   -sysconfdir=* | --sysconfdir=* | --sysconfdi=* | --sysconfd=* | --sysconf=* \
+   | --syscon=* | --sysco=* | --sysc=* | --sys=* | --sy=* | -confdir=* | --confdir=*)
+     CONFDIR=$ac_optarg ;;
+-    
++
+   -disable-rpath | --disable-rpath)
+   	TURN_DISABLE_RPATH=1 ;;
+-    
++
+   esac
+-      
++
+ done
+ 
+ if test -n "$ac_prev"; then
+@@ -443,13 +448,13 @@
+ 
+ if [ -z "${LOCALSTATEDIR}" ] ; then
+     if [ -z "${localstatedir}" ] ; then
+-    
++
+     	if [ "${PREFIX}" = "/usr" ] ; then
+ 			LOCALSTATEDIR=/var
+ 		else
+ 			LOCALSTATEDIR=${PREFIX}/var
+ 		fi
+-		
++
+     else
+ 		LOCALSTATEDIR=${localstatedir}
+     fi
+@@ -531,7 +536,7 @@
+ 
+ OSCFLAGS="-I${INCLUDEDIR} -I${PREFIX}/include/ -I/usr/local/include ${CFLAGS}"
+ OSLIBS="${LDFLAGS}"
+-for ilib in ${PREFIX}/lib/event2/ ${PREFIX}/lib/ /usr/local/lib/event2/ /usr/local/lib/ ${PREFIX}/lib64/event2/ ${PREFIX}/lib64/ /usr/local/lib64/event2/ /usr/local/lib64/ 
++for ilib in ${PREFIX}/lib/event2/ ${PREFIX}/lib/ /usr/local/lib/event2/ /usr/local/lib/ ${PREFIX}/lib64/event2/ ${PREFIX}/lib64/ /usr/local/lib64/event2/ /usr/local/lib64/
+ do
+     if [ -d ${ilib} ] ; then
+ 		OSLIBS="${OSLIBS} -L${ilib}"
+@@ -854,7 +859,7 @@
+ 
+ ###########################
+ # Test some general-purpose
+-# libraries 
++# libraries
+ ###########################
+ 
+ testlib socket
+@@ -868,6 +873,7 @@
+ testlib intl
+ testlib nsl
+ testlib resolv
++testlib dl
+ 
+ ###########################
+ # Test sockets compilation
+@@ -886,15 +892,15 @@
+ 	exit
+ fi
+ 
+-if [ -z ${TURN_NO_THREAD_BARRIERS} ] ; then 
++if [ -z ${TURN_NO_THREAD_BARRIERS} ] ; then
+ 	pthread_testbarriers
+-else 
++else
+ 	TURN_NO_THREAD_BARRIERS="-DTURN_NO_THREAD_BARRIERS"
+ fi
+ 
+-if [ -z ${TURN_IP_RECVERR} ] ; then 
++if [ -z ${TURN_IP_RECVERR} ] ; then
+ 	${ECHO_CMD} "Ignore IP_RECVERR"
+-else 
++else
+ 	${ECHO_CMD} "Use IP_RECVERR"
+ 	TURN_IP_RECVERR="-DTURN_IP_RECVERR"
+ 	OSCFLAGS="${OSCFLAGS} ${TURN_IP_RECVERR}"
+@@ -907,36 +913,10 @@
+ testdaemon
+ 
+ ###########################
+-# Test OpenSSL installation
+-###########################
+-
+-testlib crypto
+-ER=$?
+-if ! [ ${ER} -eq 0 ] ; then
+-    ${ECHO_CMD} "Crypto SSL lib found."
+-else
+-    ${ECHO_CMD} "ERROR: OpenSSL Crypto development libraries are not installed properly in required location."
+-    ${ECHO_CMD} "Abort."
+-    cleanup
+-    exit
+-fi
+-
+-testlib ssl
+-ER=$?
+-if ! [ ${ER} -eq 0 ] ; then
+-    ${ECHO_CMD} "SSL lib found."
+-else
+-    ${ECHO_CMD} "ERROR: OpenSSL development libraries are not installed properly in required location."
+-    ${ECHO_CMD} "Abort."
+-    cleanup
+-    exit
+-fi
+-
+-###########################
+ # Can we use GCM cipher ?
+ ###########################
+ 
+-if [ -z ${TURN_NO_GCM} ] ; then 
++if [ -z ${TURN_NO_GCM} ] ; then
+ 
+ gcm_testlib
+ ER=$?
+@@ -981,6 +961,7 @@
+ 	cleanup
+ 	exit
+     fi
++    testlib event_core
+ else
+     testlib event
+     ER=$?
+@@ -995,6 +976,15 @@
+     fi
+ fi
+ 
++testlib event_pthreads
++ER=$?
++if ! [ ${ER} -eq 0 ] ; then
++  ${ECHO_CMD} "Libevent2 pthreads found."
++else
++    ${ECHO_CMD} "ERROR: Libevent2 development libraries are not compiled with threads support."
++  exit
++fi
++
+ if [ -z "${TURN_NO_TLS}" ] ; then
+ 
+ 	testlib event_openssl
+@@ -1011,13 +1001,30 @@
+ 	TURN_NO_TLS="-DTURN_NO_TLS"
+ fi
+ 
+-testlib event_pthreads
++###########################
++# Test OpenSSL installation
++###########################
++
++testlib ssl
++ER=$?
++if ! [ ${ER} -eq 0 ] ; then
++    ${ECHO_CMD} "SSL lib found."
++else
++    ${ECHO_CMD} "ERROR: OpenSSL development libraries are not installed properly in required location."
++    ${ECHO_CMD} "Abort."
++    cleanup
++    exit
++fi
++
++testlib crypto
+ ER=$?
+ if ! [ ${ER} -eq 0 ] ; then
+-	${ECHO_CMD} "Libevent2 pthreads found."
++    ${ECHO_CMD} "Crypto SSL lib found."
+ else
+-   	${ECHO_CMD} "ERROR: Libevent2 development libraries are not compiled with threads support."
+-	exit
++    ${ECHO_CMD} "ERROR: OpenSSL Crypto development libraries are not installed properly in required location."
++    ${ECHO_CMD} "Abort."
++    cleanup
++    exit
+ fi
+ 
+ ###########################
+@@ -1035,7 +1042,7 @@
+    		TURN_NO_SQLITE="-DTURN_NO_SQLITE"
+ 	fi
+ 
+-	if [ -z "${TURN_NO_SQLITE}" ] ; then	
++	if [ -z "${TURN_NO_SQLITE}" ] ; then
+ 	    testsqlite_comp
+ 	    ER=$?
+ 	    if ! [ ${ER} -eq 0 ] ; then
+@@ -1046,7 +1053,7 @@
+ 	    fi
+ 	fi
+ 
+-	if ! [ -z "${TURN_NO_SQLITE}" ] ; then	
++	if ! [ -z "${TURN_NO_SQLITE}" ] ; then
+ 	    ${ECHO_CMD}
+ 	    ${ECHO_CMD} "SQLite DEVELOPMENT LIBRARY (libsqlite3) AND/OR HEADER (sqlite3.h)"
+ 	    ${ECHO_CMD} "	ARE NOT INSTALLED PROPERLY ON THIS SYSTEM."
+@@ -1141,7 +1148,7 @@
+ 	ISBSD=`uname | grep -i bsd`
+ 	if [ -z "${ISBSD}" ] ; then
+ 		ISLINUX=`uname | grep -i linux`
+-		if [ -z "${ISLINUX}" ] ; then 
++		if [ -z "${ISLINUX}" ] ; then
+ 			SYSTEM=`uname`
+ 			if [ "${SYSTEM}" = "SunOS" ] ; then
+ 				LDCONFIG="crle -u -l"
+diff -ruN coturn-4.5.0.6/src/apps/relay/mainrelay.c coturn-4.5.0.6-mod/src/apps/relay/mainrelay.c
+--- coturn-4.5.0.6/src/apps/relay/mainrelay.c	2017-03-27 11:11:03.000000000 +0800
++++ coturn-4.5.0.6-mod/src/apps/relay/mainrelay.c	2018-07-28 17:02:16.000000000 +0800
+@@ -101,7 +101,7 @@
+ #endif
+ 
+ TURN_VERBOSE_NONE,0,0,0,
+-"/var/run/turnserver.pid",
++"/var/run/whisper-bootstrapd/turnserver.pid",
+ DEFAULT_STUN_PORT,DEFAULT_STUN_TLS_PORT,0,0,1,
+ 0,0,0,0,
+ "",
+@@ -1825,7 +1825,11 @@
+ #endif
+ }
+ 
++#ifndef WHISPER_BUILD
+ int main(int argc, char **argv)
++#else
++int turn_main(int argc, char *argv[])
++#endif
+ {
+ 	int c = 0;
+ 
+@@ -2075,6 +2079,7 @@
+ 		}
+ 	}
+ 
++#ifndef WHISPER_BUILD 
+ 	if(turn_params.turn_daemon) {
+ #if !defined(TURN_HAS_DAEMON)
+ 		pid_t pid = fork();
+@@ -2092,6 +2097,7 @@
+ 		reset_rtpprintf();
+ #endif
+ 	}
++#endif
+ 
+ 	if(turn_params.pidfile[0]) {
+ 
+@@ -2105,7 +2111,8 @@
+ 			TURN_LOG_FUNC(TURN_LOG_LEVEL_WARNING, "%s\n", s);
+ 
+ 			{
+-				const char *pfs[] = {"/var/run/turnserver.pid",
++				const char *pfs[] = {"/var/run/whisper-bootstrapd/turnserver.pid"
++						"/var/run/turnserver.pid",
+ 						"/var/spool/turnserver.pid",
+ 						"/var/turnserver.pid",
+ 						"/var/tmp/turnserver.pid",
+diff -ruN coturn-4.5.0.6/src/apps/relay/userdb.c coturn-4.5.0.6-mod/src/apps/relay/userdb.c
+--- coturn-4.5.0.6/src/apps/relay/userdb.c	2017-03-27 11:11:03.000000000 +0800
++++ coturn-4.5.0.6-mod/src/apps/relay/userdb.c	2018-07-28 17:02:16.000000000 +0800
+@@ -395,6 +395,17 @@
+ 	return turn_strdup(usname);
+ }
+ 
++#if defined(WHISPER_BUILD)
++#include <sodium.h>
++#include <tox/tox.h>
++
++#define TOX_AUTH_SUFFIX			"auth.tox"
++
++void bootstrap_get_secret_key(uint8_t *secret_key);
++char *base58_encode(const void *data, size_t len, char *text, size_t *textlen);
++ssize_t base58_decode(const char *text, size_t textlen, void *data, size_t datalen);
++#endif
++
+ /*
+  * Password retrieval
+  */
+@@ -626,6 +637,57 @@
+ 		return 0;
+ 	}
+ 
++#if defined(WHISPER_BUILD)
++	/* Tox authenticate schema.
++	 *
++	 * Realm: iwhisper.io
++	 * Username: self_public_key@nonce.auth.tox
++	 * Password: HMAC-SHA256(SharedKey(self_secret_key, TURN_PublicKey), nonce)
++	 */
++
++	char *at = strchr((const char*)usname, '@');
++	if (at && *(at + 1)) {
++		char *dot = strchr((const char *)at, '.');
++		if (dot && *(dot + 1) && strcmp(dot + 1, TOX_AUTH_SUFFIX) == 0) {
++			uint8_t nonce[crypto_box_NONCEBYTES];
++			uint8_t userpk[TOX_PUBLIC_KEY_SIZE];
++			uint8_t bootstrap_secret_key[TOX_SECRET_KEY_SIZE];
++			uint8_t shared_key[crypto_box_BEFORENMBYTES];
++			uint8_t hmac[crypto_auth_hmacsha256_BYTES];
++			char pwd[crypto_auth_hmacsha256_BYTES * 2];
++			size_t pwd_len = sizeof(pwd);
++
++			TURN_LOG_FUNC(TURN_LOG_LEVEL_INFO, "Using bootstrap integrated authentication.\n");
++
++			if (base58_decode((const char *)at + 1, dot - at - 1, nonce, sizeof(nonce)) != sizeof(nonce)) {
++				TURN_LOG_FUNC(TURN_LOG_LEVEL_ERROR, "Bootstrap integrated authenticate with wrong NONCE.");
++				return -1;
++			}
++
++			if (base58_decode((const char *)usname, at - (char *)usname, userpk, sizeof(userpk)) != sizeof(userpk)) {
++				TURN_LOG_FUNC(TURN_LOG_LEVEL_ERROR, "Bootstrap integrated authenticate with wrong user ID.");
++				return -1;
++			}
++
++			bootstrap_get_secret_key(bootstrap_secret_key);
++			
++			if (crypto_box_beforenm(shared_key, userpk, bootstrap_secret_key) < 0) {
++				TURN_LOG_FUNC(TURN_LOG_LEVEL_ERROR, "Bootstrap integrated authenticate with wrong user ID.");
++				return -1;
++			}
++
++			crypto_auth_hmacsha256(hmac, nonce, sizeof(nonce), shared_key);
++			base58_encode(hmac, sizeof(hmac), pwd, &pwd_len);
++
++			// Generate user key according to coturn mechanism.
++			stun_produce_integrity_key_str(usname, realm, (u08bits *)pwd, key, SHATYPE_DEFAULT);
++			return 0;
++		}
++	}
++
++	TURN_LOG_FUNC(TURN_LOG_LEVEL_INFO, "Fallback to default DB authentication.\n");	
++#endif
++
+ 	const turn_dbdriver_t * dbd = get_dbdriver();
+ 	if (dbd && dbd->get_user_key) {
+ 		ret = (*(dbd->get_user_key))(usname, realm, key);
