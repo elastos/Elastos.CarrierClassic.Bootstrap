@@ -1,6 +1,0 @@
-179c179
-< 	${RMCMD} bin build lib obj *bak *~ */*~ */*/*~ */*/*/*~ *core */*core */*/*core include Makefile tmp sqlite
----
-> 	${RMCMD} bin build lib obj *bak *~ */*~ */*/*~ */*/*/*~ *core */*core */*/*core include tmp sqlite
-182a183
-> 	${RMCMD} Makefile
