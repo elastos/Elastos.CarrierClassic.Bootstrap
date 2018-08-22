@@ -25,7 +25,9 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <signal.h>
 #include <limits.h>
 #include <time.h>
@@ -36,12 +38,10 @@
 #include <sys/wait.h>
 #include <sys/stat.h>
 
+#include "version.h"
 #include "setproctitle.h"
 
-#define PROGRAM_NAME                        "ela-bootstrapd"
-
-#define ELASTOS_BOOTSTRAP_VERSION           "5.0"
-#define ELASTOS_BOOTSTRAP_BUILD_NUMBER      20171203UL
+#define PROGRAM_NAME "ela-bootstrapd"
 
 static const char *bootstrap_config_files[] = {
     "./bootstrapd.conf",
@@ -52,7 +52,7 @@ static const char *bootstrap_config_files[] = {
 
 static bool run_in_foreground = false;
 
-static const char *get_config_file(const char *config, 
+static const char *get_config_file(const char *config,
         const char *candidates[])
 {
     const char **cond;
@@ -81,7 +81,7 @@ void bootstrap_get_secret_key(uint8_t *secret_key)
     memcpy(secret_key, bootstrap_secret_key, sizeof(bootstrap_secret_key));
 }
 
-pid_t start_turn_server(int port, const char *realm, const char *pid_file, 
+pid_t start_turn_server(int port, const char *realm, const char *pid_file,
                         const char *userdb, int verbose, uint8_t *secret_key)
 {
     pid_t pid;
@@ -147,7 +147,7 @@ pid_t start_turn_server(int port, const char *realm, const char *pid_file,
         opterr = 1;
         optind = 1;
         optopt = '?';
-        optarg = NULL;   
+        optarg = NULL;
 
         rc = turn_main(nargs, args);
         exit(rc);
@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
     int rc;
 
     static struct option long_options[] = {
-        {"config",                  required_argument, 0, 'c'}, 
+        {"config",                  required_argument, 0, 'c'},
         {"foreground",              no_argument,       0, 'f'},
         {"help",                    no_argument,       0, 'h'},
         {"version",                 no_argument,       0, 'v'},
@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
     int opt;
 
     printf("Elastos bootstrap daemon, version %s(%lu)\n",
-            ELASTOS_BOOTSTRAP_VERSION, ELASTOS_BOOTSTRAP_BUILD_NUMBER);
+            elastos_bootstrapd_version, elastos_bootstrapd_buildnumber);
 
     while ((opt = getopt_long(argc, argv, "c:fhv", long_options, NULL)) != -1) {
         switch (opt) {
@@ -219,8 +219,8 @@ int main(int argc, char *argv[])
                 exit(0);
 
             case 'v':
-                printf("Version: %s(%lu)\n", ELASTOS_BOOTSTRAP_VERSION, 
-                        ELASTOS_BOOTSTRAP_BUILD_NUMBER);
+                printf("Version: %s(%lu)\n", elastos_bootstrapd_version,
+                        elastos_bootstrapd_buildnumber);
                 exit(0);
 
             case '?':
@@ -228,7 +228,7 @@ int main(int argc, char *argv[])
                 exit(1);
 
             case ':':
-                printf("Error: No argument provided for option %s\n\n", 
+                printf("Error: No argument provided for option %s\n\n",
                         argv[optind - 1]);
                 print_help();
                 exit(1);
@@ -260,7 +260,7 @@ int main(int argc, char *argv[])
     opterr = 1;
     optind = 1;
     optopt = '?';
-    optarg = NULL;   
+    optarg = NULL;
 
     args[nargs++] = (char *)PROGRAM_NAME;
 

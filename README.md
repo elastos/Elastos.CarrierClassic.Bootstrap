@@ -6,39 +6,40 @@ Elastos Carrier boostrap daemon is a basic service to help new node join and boo
 
 ## Build from source
 
-### Ubuntu
+### GNU/Linux
 
-Currently, **Linux is the only recommend platform** to run the Elastos carrier boostrapd officially.
+Currently, **GNU/Linux is the only recommend platform** to run the Elastos carrier boostrapd officially.
 
 #### 1. Install Pre-requirements
 
 Run the following commands to install all pre-requirements.
 
-```
+```shell
 $ sudo apt-get update
 $ sudo apt-get install build-essential autoconf automake autopoint libtool bison texinfo
 ```
 
 #### 2. Build
 
-Change to the directory `$(SRC_DIR)/build`, and run the following command:
+Change to the directory `$(SRC_DIR)/build`, and run the following commands:
 
-```
-$ ./linux_build.sh
+```shell
+$ mkdir linux
+$ cd linux
+$ cmake -DCMAKE_INSTALL_PREFIX=outputs ../..
+$ make install
 ```
 
 To build Debian (.deb) package, run command with `"dist"` option:
 
-```bash
-$ ./linux_build.sh dist
+```shell
+$ make dist
 ```
 
-The generated Debian package' location is: `$(SRC_DIR)/build/_dist/Linux-x86_64/[debug|release]/elastos_bootstrapd.deb`
+The generated Debian package will be located at current working directory, can can use the command to locate it:
 
-For more build options, run command with `"help"` option:
-
-```
-$ ./linux_build.sh help
+```shell
+$ ls -la *.deb
 ```
 
 #### 3. Deployment & Run
@@ -67,7 +68,7 @@ After installed Elastos Carrier bootstrap deamon, you should modify `/etc/elasto
 
 ### MacOS
 
-For convenience, you can develop Elastos Carrier boostrapd on MacOS for testing or debugging.
+You can also develop Elastos Carrier boostrapd on MacOS for testing or debugging purpose.
 
 #### 1. Install Pre-requirents
 
@@ -85,18 +86,30 @@ brew install autoconf automake libtool shtool pkg-config gettext
 
 #### 2. Build
 
-Change to directory `$(SRC_DIR)/build`, and run the following command:
+Change to directory `$(SRC_DIR)/build`, and run the following commands:
 
 ```
-$ ./darwin_build.sh
+$ mkdir macos
+$ cd macos
+$ cmake -DCMAKE_INSTALL_PREFIX=outputs ../..
+$ make install
 ```
 
-For more build options, run build script with "help" option:
+After that, you can run the following commands to run **ela-bootstrapd** to boost the bootstrap node as long as finishing certian configurations:
 
-```
-$ ./darwin_build.sh help
+```shell
+$ cd outputs/usr/bin
+$ ./ela-bootstrapd --config=../../etc/elastos/bootstrapd.conf --foreground
 ```
 
 #### 3. Deployment
 
 Elastos Carrier bootstrap daemon currently not support deploy on MacOS.
+
+## Thanks
+
+Sincerely thanks to all teams and projects that we relies on directly or indirectly.
+
+## License
+
+MIT
