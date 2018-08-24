@@ -63,17 +63,15 @@ target_link_libraries(ela-bootstrapd
     ${SYSTEM_LIBS})
 
 install(TARGETS ela-bootstrapd
-    RUNTIME DESTINATION "bin"
-    ARCHIVE DESTINATION "lib"
-    LIBRARY DESTINATION "lib")
+    RUNTIME DESTINATION "usr/bin"
+    ARCHIVE DESTINATION "usr/lib"
+    LIBRARY DESTINATION "usr/lib")
 install(FILES ${CMAKE_SOURCE_DIR}/config/bootstrapd.conf
     DESTINATION "etc/elastos")
 install(FILES ${CMAKE_SOURCE_DIR}/scripts/ela-bootstrapd.service
     DESTINATION "lib/systemd/system")
 install(PROGRAMS ${CMAKE_SOURCE_DIR}/scripts/ela-bootstrapd.sh
-    DESTINATION "etc/init.d/ela-bootstrapd")
+    DESTINATION "etc/init.d"
+    RENAME "ela-bootstrapd")
 install(DIRECTORY
     DESTINATION "var/lib/ela-bootstrapd/db")
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/debian
-    DESTINATION "DEBIAN"
-    USE_SOURCE_PERMISSIONS)

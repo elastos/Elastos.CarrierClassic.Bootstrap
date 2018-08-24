@@ -8,10 +8,33 @@ set(CPACK_PACKAGE_DESCRIPTION "Elastos Carrier Bootstrap Distribution Packages")
 set(CPACK_PACKAGE_VERSION_MAJOR ${CARRIER_VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${CARRIER_VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${CARRIER_VERSION_PATCH})
-set(CPACK_GENERATOR "TGZ")
-
 set(CPACK_PACKAGE_VENDOR "elastos.org")
 set(CPACK_PACKAGE_CONTACT "libin@elastos.org")
+if(MACOS)
+    set(CPACK_GENERATOR "TGZ")
+elseif(LINUX OR RPI)
+    set(CPACK_PACKAGING_INSTALL_PREFIX "/")
+    set(CPACK_GENERATOR "DEB")
+    set(CPACK_DEBIAN_PACKAGE_NAME "elastos-bootstrapd")
+    set(CPACK_DEBIAN_PACKAGE_SOURCE "elastos")
+    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
+    set(CPACK_DEBIAN_PACKAGE_PREDEPENDS "adduser")
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS
+        "lsb-base (>= 3.0), init-system-helpers (>= 1.18~),
+        libc6 (>= 2.14), libsystemd0")
+    set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://www.elastos.org/")
+    set(CPACK_DEBIAN_PACKAGE_DESCRIPTION
+        "Elastos Carrier bootstrap (daemon)
+        Elastos Carrier is a decentralized peer to peer communication framework.
+        .
+        This package contains the elastos carrier bootstrap daemon.
+        Use this bootstrap built up the well known bootstrap nodes.")
+    set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
+        "${CMAKE_SOURCE_DIR}/debian/postinst;
+        ${CMAKE_SOURCE_DIR}/debian/postrm;
+        ${CMAKE_SOURCE_DIR}/debian/preinst;
+        ${CMAKE_SOURCE_DIR}/debian/prerm")
+endif()
 
 if(UNIX)
     if(APPLE)
