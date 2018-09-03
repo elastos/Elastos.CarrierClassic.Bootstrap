@@ -1,0 +1,11 @@
+#ifndef __ELASTOS_BOOTSTRAPD_VERSION_H__
+#define __ELASTOS_BOOTSTRAPD_VERSION_H__
+
+static const
+char *elastos_bootstrapd_version = "@ELASTOS_BOOTSTRAPD_VERSION_MAJOR@."
+                                   "@ELASTOS_BOOTSTRAPD_VERSION_MINOR@";
+
+static const
+unsigned long elastos_bootstrapd_buildnumber
+                                 = @ELASTOS_BOOSTRAPD_BUILD_NUMBER@UL;
+#endif
