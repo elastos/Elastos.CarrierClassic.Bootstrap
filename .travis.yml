@@ -1,0 +1,26 @@
+language: c
+
+matrix:
+  include:
+  - os: osx
+    env: BUILD_ENV=darwin_x64_debug
+    script:
+      - cd $TRAVIS_BUILD_DIR/build && mkdir $BUILD_ENV && cd $BUILD_ENV && cmake -DCMAKE_INSTALL_PREFIX=output ../..
+      - make && make install
+
+  - os: osx
+    env: BUILD_ENV=darwin_x64_release
+    script:
+      - cd $TRAVIS_BUILD_DIR/build && mkdir $BUILD_ENV && cd $BUILD_ENV && cmake -DCMAKE_INSTALL_PREFIX=output -DCMAKE_BUILD_TYPE=Release ../..
+      - make && make install
+
+  - env: BUILD_ENV=linux_x64_debug
+    script:
+      - cd $TRAVIS_BUILD_DIR/build && mkdir $BUILD_ENV && cd $BUILD_ENV && cmake -DCMAKE_INSTALL_PREFIX=output ../..
+      - make && make install && make dist
+
+  - env: BUILD_ENV=linux_x64_release
+    sudo: true
+    script:
+      - cd $TRAVIS_BUILD_DIR/build && mkdir $BUILD_ENV && cd $BUILD_ENV && cmake -DCMAKE_INSTALL_PREFIX=output -DCMAKE_BUILD_TYPE=Release ../..
+      - make && make install && make dist
