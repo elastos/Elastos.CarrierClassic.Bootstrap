@@ -1,4 +1,4 @@
-# Elastos Carrier Boostrap Daemon
+# Elastos Carrier Boostrap Daemon [![Build Status](https://travis-ci.org/elastos/Elastos.NET.Carrier.Bootstrap.svg?branch=master)](https://travis-ci.org/elastos/Elastos.NET.Carrier.Bootstrap)
 
 ## Summary
 
@@ -62,7 +62,7 @@ to check the service status. If the deamon started successful, the status should
 
 Reference: [Man page for systemctl](https://www.freedesktop.org/software/systemd/man/systemctl.html).
 
-***NOTICE:*** 
+***NOTICE:***
 
 After installed Elastos Carrier bootstrap deamon, you should modify `/etc/elastos/bootstrapd.conf`, update the **bootstrap_nodes** section according your deployment.
 
