@@ -45,10 +45,6 @@ target_link_libraries(ela-bootstrapd
     turnserver
     tox-bootstrapd
     toxcore
-    toxdht
-    toxcrypto
-    toxnetwork
-    toxnetcrypto
     config
     event_openssl
     event_pthreads
