@@ -1,0 +1,85 @@
+diff -ruN phc-winner-argon2-20171227/Makefile phc-winner-argon2-20171227-mod/Makefile
+--- phc-winner-argon2-20171227/Makefile	2017-12-28 03:56:31.000000000 +0800
++++ phc-winner-argon2-20171227-mod/Makefile	2019-01-01 20:12:26.000000000 +0800
+@@ -72,6 +72,7 @@
+ 	LIB_EXT := $(ABI_VERSION).dylib
+ 	LIB_CFLAGS := -dynamiclib -install_name @rpath/lib$(LIB_NAME).$(LIB_EXT)
+ 	LINKED_LIB_EXT := dylib
++	SED_ARGS_PAD := ''
+ endif
+ ifeq ($(findstring CYGWIN, $(KERNEL_NAME)), CYGWIN)
+ 	LIB_EXT := dll
+@@ -106,13 +107,14 @@
+ endif
+ 
+ 
+-LIBRARIES = $(LIB_SH) $(LIB_ST)
++#LIBRARIES = $(LIB_SH) $(LIB_ST)
++LIBRARIES = $(LIB_ST)
+ HEADERS = include/argon2.h
+ 
+ INSTALL = install
+ 
+ DESTDIR =
+-PREFIX = /usr
++PREFIX ?= /usr
+ INCLUDE_REL = include
+ LIBRARY_REL = lib
+ BINARY_REL = bin
+@@ -135,12 +137,15 @@
+ $(GENKAT):      $(SRC) $(SRC_GENKAT)
+ 		$(CC) $(CFLAGS) $^ -o $@ -DGENKAT
+ 
+-$(LIB_SH): 	$(SRC)
+-		$(CC) $(CFLAGS) $(LIB_CFLAGS) $(LDFLAGS) $(SO_LDFLAGS) $^ -o $@
++# $(LIB_SH): 	$(SRC)
++#		$(CC) $(CFLAGS) $(LIB_CFLAGS) $(LDFLAGS) $(SO_LDFLAGS) $^ -o $@
+ 
+ $(LIB_ST): 	$(OBJ)
+ 		ar rcs $@ $^
+ 
++pc:
++		sed -i $(SED_ARGS_PAD) 's%^prefix=.*%prefix=$(PREFIX)%g' libargon2.pc
++
+ clean:
+ 		rm -f $(RUN) $(BENCH) $(GENKAT)
+ 		rm -f $(LIB_SH) $(LIB_ST) kat-argon2*
+@@ -170,14 +175,16 @@
+ 		clang-format -style="{BasedOnStyle: llvm, IndentWidth: 4}" \
+ 			-i include/*.h src/*.c src/*.h src/blake2/*.c src/blake2/*.h
+ 
+-install: $(RUN) libs
++install: $(RUN) libs pc
+ 	$(INSTALL) -d $(INST_INCLUDE)
+ 	$(INSTALL) -m 0644 $(HEADERS) $(INST_INCLUDE)
+ 	$(INSTALL) -d $(INST_LIBRARY)
+ 	$(INSTALL) $(LIBRARIES) $(INST_LIBRARY)
+-ifdef LINKED_LIB_SH
+-	cd $(INST_LIBRARY) && ln -s $(notdir $(LIB_SH) $(LINKED_LIB_SH))
+-endif
++	$(INSTALL) -d $(INST_LIBRARY)/pkgconfig
++	$(INSTALL) libargon2.pc $(INST_LIBRARY)/pkgconfig
++#ifdef LINKED_LIB_SH
++#	cd $(INST_LIBRARY) && ln -s $(notdir $(LIB_SH) $(LINKED_LIB_SH))
++#endif
+ 	$(INSTALL) -d $(INST_BINARY)
+ 	$(INSTALL) $(RUN) $(INST_BINARY)
+ 
+diff -ruN phc-winner-argon2-20171227/libargon2.pc phc-winner-argon2-20171227-mod/libargon2.pc
+--- phc-winner-argon2-20171227/libargon2.pc	2017-12-28 03:56:31.000000000 +0800
++++ phc-winner-argon2-20171227-mod/libargon2.pc	2019-01-01 20:12:42.000000000 +0800
+@@ -5,12 +5,12 @@
+ 
+ prefix=/usr
+ exec_prefix=${prefix}
+-libdir=${prefix}/lib/@HOST_MULTIARCH@
++libdir=${prefix}/lib
+ includedir=${prefix}/include
+ 
+ Name: libargon2
+ Description: Development libraries for libargon2
+-Version: @UPSTREAM_VER@
++Version: 20171227 
+ Libs: -L${libdir} -largon2 -lrt -ldl
+ Cflags:
+ URL: https://github.com/P-H-C/phc-winner-argon2
