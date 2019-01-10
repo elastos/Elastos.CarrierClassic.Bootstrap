@@ -82,7 +82,8 @@ void bootstrap_get_secret_key(uint8_t *secret_key)
 }
 
 pid_t start_turn_server(int port, const char *realm, const char *pid_file,
-                        const char *userdb, int verbose, uint8_t *secret_key)
+                        const char *userdb, int verbose, const char
+                        *external_ip, uint8_t *secret_key)
 {
     pid_t pid;
 
@@ -128,6 +129,11 @@ pid_t start_turn_server(int port, const char *realm, const char *pid_file,
 
         if (verbose)
             args[nargs++] = (char *)"-v";
+
+        if (external_ip) {
+            args[nargs++] = (char *)"-X";
+            args[nargs++] = (char *)external_ip;
+        }
 
         if (run_in_foreground) {
             args[nargs++] = (char *)"--log-file=stdout";
