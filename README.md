@@ -6,7 +6,7 @@ Elastos Carrier boostrap daemon is a basic service to help new node join and boo
 
 ## Build from source
 
-### GNU/Linux
+### GNU/Linux (Ubuntu 16.04-x86_64 LTS is recommended)
 
 Currently, **GNU/Linux is the only recommend platform** to run the Elastos carrier boostrapd officially.
 
@@ -64,7 +64,11 @@ Reference: [Man page for systemctl](https://www.freedesktop.org/software/systemd
 
 ***NOTICE:***
 
+##### 1. Update bootstrap nodes list
 After installed Elastos Carrier bootstrap deamon, you should modify `/etc/elastos/bootstrapd.conf`, update the **bootstrap_nodes** section according your deployment.
+
+##### 2. Set external IP to turn server explicitly
+Some Linux VPS servers , for example, servers from AWS, can't fetch public IP address directly by itself,  so you have manually update the public IP address of item **external_ip** in section **turn** for config file `/etc/elastos/bootstrap.conf`.
 
 ### MacOS
 
@@ -88,7 +92,7 @@ brew install autoconf automake libtool shtool pkg-config gettext
 
 Change to directory `$(SRC_DIR)/build`, and run the following commands:
 
-```
+```shell
 $ mkdir macos
 $ cd macos
 $ cmake -DCMAKE_INSTALL_PREFIX=outputs ../..
