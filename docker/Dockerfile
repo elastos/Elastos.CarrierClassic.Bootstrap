@@ -30,6 +30,7 @@ RUN set -ex                                                                     
         flex \
         bison \
         texinfo \
+        pkg-config \
         openssl \
         git \
         gperf \
