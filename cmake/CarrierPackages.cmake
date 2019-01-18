@@ -29,10 +29,10 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
         This package contains the elastos carrier bootstrap daemon.
         Use this bootstrap built up the well known bootstrap nodes.")
     set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
-        "${CMAKE_SOURCE_DIR}/debian/postinst;
-        ${CMAKE_SOURCE_DIR}/debian/postrm;
-        ${CMAKE_SOURCE_DIR}/debian/preinst;
-        ${CMAKE_SOURCE_DIR}/debian/prerm")
+        "${CMAKE_SOURCE_DIR}/debian/postinst;"
+        "${CMAKE_SOURCE_DIR}/debian/postrm;"
+        "${CMAKE_SOURCE_DIR}/debian/preinst;"
+        "${CMAKE_SOURCE_DIR}/debian/prerm")
 endif()
 
 if(APPLE)
