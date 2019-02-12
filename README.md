@@ -116,4 +116,4 @@ Sincerely thanks to all teams and projects that we relies on directly or indirec
 
 ## License
 
-MIT
+GPLv3
