@@ -19,6 +19,7 @@ ExternalProject_Add(
         -DOPENDHT_SHARED=OFF
         -DOPENDHT_LOG=OFF
         -DOPENDHT_PYTHON=OFF
+        -DOPENDHT_LTO=ON
         -DOPENDHT_TOOLS=OFF
         -DOPENDHT_SYSTEMD=OFF
         -DOPENDHT_ARGON2=OFF

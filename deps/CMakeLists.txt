@@ -12,6 +12,8 @@ add_submodule(toxcore0
     DEPENDS libsodium libconfig)
 add_submodule(coturn
     DEPENDS libevent libressl sqlite libsodium toxcore0)
+
+# opendht & dependencies
 add_submodule(libgmp
     DIRECTORY gmp)
 add_submodule(libnettle
