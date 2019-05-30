@@ -47,12 +47,20 @@ RUN ls -alh build/linux/outputs/usr/bin/ela-bootstrapd
 ######################################
 FROM ubuntu:16.04
 
-COPY --from=builder /ela-carrier/bootstrap/build/linux/outputs/usr/bin/ela-bootstrapd /root/bootstrap/ela-bootstrapd
-COPY --from=builder /ela-carrier/bootstrap/build/linux/outputs/etc/elastos/bootstrapd.conf /root/bootstrap/bootstrapd.conf
+COPY --from=builder /ela-carrier/bootstrap/build/linux/outputs/usr/bin/ela-bootstrapd /ela-carrier/ela-bootstrapd
+COPY --from=builder /ela-carrier/bootstrap/build/linux/outputs/etc/elastos/bootstrapd.conf /ela-carrier/bootstrapd.conf
 
 WORKDIR /root/bootstrap
 
 RUN mkdir -p /var/lib/ela-bootstrapd/db /var/run/ela-bootstrapd
+
+RUN adduser --disabled-password --gecos "" elauser && \
+    chown -R elauser /ela-carrier && \
+	chown -R elauser /var/lib/ela-bootstrapd/ /var/run/ela-bootstrapd
+
+USER elauser
+
+WORKDIR /ela-carrier
 
 EXPOSE 33445
 
