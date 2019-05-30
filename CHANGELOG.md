@@ -1,5 +1,10 @@
 
 
+05/30/2019 Rao Zhiming <raozhiming@elastos.org>
+release-v5.2.3: Main changes of this release version includes:
+
+    - update bootstrapd.conf
+
 01/19/2019 Tang Zhilong <stiartsly@gmail.com>
 release-v5.2.2: Main changes of this release version includes:
 
