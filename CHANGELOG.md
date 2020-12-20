@@ -1,9 +1,12 @@
+12/20/2020 Li Fenxiang <lifenxiang@trinity-tech.io>
+release-v6.0.1: Main changes of this release version includes:
 
+	- Upgrade tox to v0.2.12.
 
 05/30/2019 Rao Zhiming <raozhiming@elastos.org>
 release-v5.2.3: Main changes of this release version includes:
 
-    - update bootstrapd.conf
+	- Update bootstrapd.conf.
 
 01/19/2019 Tang Zhilong <stiartsly@gmail.com>
 release-v5.2.2: Main changes of this release version includes:

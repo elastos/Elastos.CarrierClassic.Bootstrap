@@ -9,8 +9,8 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "")
 endif()
 
 # Carrier Bootstrap Version Defintions.
-set(CARRIER_VERSION_MAJOR "5")
-set(CARRIER_VERSION_MINOR "2")
+set(CARRIER_VERSION_MAJOR "6")
+set(CARRIER_VERSION_MINOR "0")
 execute_process(
     COMMAND git rev-parse master
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
