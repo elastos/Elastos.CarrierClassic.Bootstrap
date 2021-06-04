@@ -4,13 +4,13 @@
 
 ## Summary
 
-Elastos Carrier boostrap daemon is a basic service to help new node join and bootstrap the Elastos Carrier network.
+Elastos Carrier bootstrap daemon is an essential service to help new nodes join and bootstrap the Elastos Carrier network.
 
 ## Build from source
 
 ### GNU/Linux (Ubuntu 16.04-x86_64 LTS is recommended)
 
-Currently, **GNU/Linux is the only recommend platform** to run the Elastos carrier boostrapd officially.
+Currently, **GNU/Linux is the only recommend platform** to run the Elastos carrier bootstrapd officially.
 
 #### 1. Install Pre-requirements
 
@@ -38,7 +38,7 @@ To build Debian (.deb) package, run command with `"dist"` option:
 $ make dist
 ```
 
-The generated Debian package will be located at current working directory, can can use the command to locate it:
+The generated Debian package will be located at the current working directory. You can use the command to locate it:
 
 ```shell
 $ ls -la *.deb
@@ -54,27 +54,27 @@ Copy generated Debian package (.deb file) to target machine. Then run following 
 $ sudo dpkg -i /path/to/elastos_bootstrapd.deb
 ```
 
-After install complete, the bootstrap deamon will start automatically. You can run:
+After the install complete, the bootstrap daemon will start automatically. You can run:
 
 ```shell
 $ sudo systemctl status ela-bootstrapd
 ```
 
-to check the service status. If the deamon started successful, the status should be **active (running)**.
+to check the service status. If the daemon started successfully, the status should be **active (running)**.
 
 Reference: [Man page for systemctl](https://www.freedesktop.org/software/systemd/man/systemctl.html).
 
 ***NOTICE:***
 
 ##### 1. Update bootstrap nodes list
-After installed Elastos Carrier bootstrap deamon, you should modify `/etc/elastos/bootstrapd.conf`, update the **bootstrap_nodes** section according your deployment.
+After installed Elastos Carrier bootstrap daemon, you should modify `/etc/elastos/bootstrapd.conf`, update the **bootstrap_nodes** section according your deployment.
 
 ##### 2. Set external IP to turn server explicitly
 Some Linux VPS servers , for example, servers from AWS, can't fetch public IP address directly by itself,  so you have manually update the public IP address of item **external_ip** in section **turn** for config file `/etc/elastos/bootstrap.conf`.
 
 ### MacOS
 
-You can also develop Elastos Carrier boostrapd on MacOS for testing or debugging purpose.
+You can also develop Elastos Carrier bootstrapd on MacOS for testing or debugging purposes.
 
 #### 1. Install Pre-requirents
 
@@ -110,12 +110,13 @@ $ ./ela-bootstrapd --config=../../etc/elastos/bootstrapd.conf --foreground
 
 #### 3. Deployment
 
-Elastos Carrier bootstrap daemon currently not support deploy on MacOS.
+Elastos Carrier bootstrap daemon currently does not support MacOS.
 
 ## Thanks
 
-Sincerely thanks to all teams and projects that we relies on directly or indirectly.
+Sincerely thanks to all teams and projects that we rely on directly or indirectly.
 
 ## License
 
 GPLv3
+
