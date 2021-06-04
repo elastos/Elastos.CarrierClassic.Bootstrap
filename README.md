@@ -1,4 +1,4 @@
-# Elastos Carrier Boostrap Daemon 
+# Elastos Carrier Bootstrap Daemon 
 
 [![Build Status](https://travis-ci.com/elastos/Elastos.NET.Carrier.Bootstrap.svg?branch=master)](https://travis-ci.com/elastos/Elastos.NET.Carrier.Bootstrap)
 
