@@ -81,13 +81,13 @@ You can also develop Elastos Carrier bootstrapd on MacOS for testing or debuggin
 You need to install the following utility packages on your MacOS before build.
 
 ```
-autoconf automake libtool shtool pkg-config gettext
+autoconf automake cmake libtool shtool pkg-config gettext
 ```
 
 Or, you can use `brew` command to install the packages:
 
 ```
-brew install autoconf automake libtool shtool pkg-config gettext
+brew install autoconf automake cmake libtool shtool pkg-config gettext
 ```
 
 #### 2. Build
